@@ -37,6 +37,7 @@ int main(int argc, char* args[]) {
     const int block_scale = 4;    // 1 block = 2^4 by 2^4 pixels
     const int win_block_w = win_w >> block_scale;
     const int win_block_h = win_h >> block_scale;
+    const int block_limits[4] = {0, win_block_h-1, 0, win_block_w-1};
 
     Vector2 spos = Vector2(3, 11); // position scaled to block size
     Vector2 pos = spos.scale2(block_scale);
@@ -82,7 +83,7 @@ int main(int argc, char* args[]) {
 
         next_time = (unsigned long long) (Utils::upTimeSeconds() * timestep);
         if (next_time > curr_time) {
-            guy.incrementSPos(svel);
+            guy.incrementSPos(svel, block_limits);
             curr_time = next_time;
         }
 

@@ -5,6 +5,7 @@
 
 #include "Entity.hpp"
 #include "Math.hpp"
+#include "Utils.hpp"
 
 class Block : public Entity {
 public:
@@ -21,6 +22,8 @@ public:
     int incrementSY(int p_dy);
 
     Vector2& incrementSPos(Vector2 p_d);
+
+    Vector2& incrementSPos(Vector2 p_d, const int* p_limits); // {T, B, L, R}
 
     void printPos(int p_pos_type);
 
