@@ -1,0 +1,10 @@
+# executables
+bin
+*.exe
+*.o
+
+# build files
+build_*.txt
+
+# asset development
+res/dev/*
