@@ -35,22 +35,31 @@ int main(int argc, char* args[]) {
 	RenderWindow window = RenderWindow(win_name, win_w, win_h, win_scale);
     
     const int block_scale = 4;    // 1 block = 2^4 by 2^4 pixels
-    const int win_block_w = win_w >> block_scale;
+    const int win_block_w = win_w >> block_scale;   
     const int win_block_h = win_h >> block_scale;
+    const int num_blocks = win_block_h * win_block_w;
     const int block_limits[4] = {0, win_block_h-1, 0, win_block_w-1};
 
-    Vector2 spos = Vector2(3, 11); // position scaled to block size
-    Vector2 pos = spos.scale2(block_scale);
-	SDL_Texture* test_texture = window.loadTexture("res/img/test1.png");
+    Vector2 head_spos = Vector2(3, 11); // position scaled to block size
+	SDL_Texture* snake_texture = window.loadTexture("res/img/test1.png");
     int snake_size = 1;
-    Block* snake = (Block*) malloc(240 * sizeof(Block));
-    snake[0] = Block(spos, test_texture, block_scale);
+    Block* snake = (Block*) malloc(num_blocks * sizeof(Block));
+    snake[0] = Block(head_spos, snake_texture, block_scale);
+
+    //char snake_grid[win_block_h][win_block_w] = {0};    // 0 if empty, 1 if snake block
+    //snake_grid[head_spos.f_y][head_spos.f_x] = 1;
+
+    const int rand_constant = Utils::log2(win_block_w);    // used for calculating (x,y) from block number
+    Vector2 food_spos = Utils::randVectorInSpace(num_blocks, rand_constant);
+    SDL_Texture* food_texture = window.loadTexture("res/img/test2.png");
+    Block food = Block(food_spos, food_texture, block_scale);
+
     KeyMap keyboard = KeyMap();
 
 	// game loop
     unsigned long long curr_time = 0;
     unsigned long long next_time = 0;
-    float timestep = 5.0f;  // position updates every 1.0/timestep seconds 
+    float timestep = 10.0f;  // position updates every 1.0/timestep seconds 
 
 	bool game_running = true;
     Vector2 svel = Vector2(0,0);
@@ -68,20 +77,16 @@ int main(int argc, char* args[]) {
                 if (scancode == keyboard.f_back) {
                     game_running = false;
                 }
-                if (scancode == keyboard.f_select) {
-                    snake[snake_size] = Block(snake[snake_size-1].getSPos(), test_texture, block_scale);
-                    snake_size++;
-                }
-                if (scancode == keyboard.f_up && spos.f_y > 0) {
+                if (scancode == keyboard.f_up && head_spos.f_y > 0) {
                     svel = Vector2(0,-1);
                 }
-                if (scancode == keyboard.f_down  && spos.f_y < win_block_h-1) {
+                if (scancode == keyboard.f_down  && head_spos.f_y < win_block_h-1) {
                     svel = Vector2(0,1);
                 }
-                if (scancode == keyboard.f_left && spos.f_x > 0) {
+                if (scancode == keyboard.f_left && head_spos.f_x > 0) {
                     svel = Vector2(-1,0);
                 }
-                if (scancode == keyboard.f_right && spos.f_x < win_block_w-1) {
+                if (scancode == keyboard.f_right && head_spos.f_x < win_block_w-1) {
                     svel = Vector2(1,0);
                 }
             }     
@@ -96,6 +101,13 @@ int main(int argc, char* args[]) {
             }
             // update head
             snake[0].incrementSPos(svel, block_limits);
+            // check for eating
+            if (snake[0].getSPos() == food.getSPos()) {
+                food.setSPos(Utils::randVectorInSpace(num_blocks, rand_constant));
+                snake[snake_size] = Block(snake[snake_size-1].getSPos(), snake_texture, block_scale);
+                    snake_size++;
+            }
+
             curr_time = next_time;
         }
 
@@ -104,10 +116,10 @@ int main(int argc, char* args[]) {
         for (int i=0; i<snake_size; i++) {
             window.render(snake[i]);
         } 
-        spos = snake[0].getSPos();
-        pos = snake[0].getPos();
+        head_spos = snake[0].getSPos();
+        window.render(food);
         
-
+        food.printPos(0);
 
  		window.display();
 	}
