@@ -28,7 +28,7 @@ int main(int argc, char* args[]) {
 	}
 
 	// game setup
-	char win_name[] = "Snake v0.0";
+	char win_name[] = "Snake v0.1";
 	const int win_w = 256;
 	const int win_h = 240;
     const int win_scale = 1;
@@ -42,13 +42,9 @@ int main(int argc, char* args[]) {
     Vector2 spos = Vector2(3, 11); // position scaled to block size
     Vector2 pos = spos.scale2(block_scale);
 	SDL_Texture* test_texture = window.loadTexture("res/img/test1.png");
-    int snake_size = 4;
-    Block snake[snake_size] = {
-        Block(spos, test_texture, block_scale),
-        Block(spos, test_texture, block_scale),
-        Block(spos, test_texture, block_scale),
-        Block(spos, test_texture, block_scale)
-    };
+    int snake_size = 1;
+    Block* snake = (Block*) malloc(240 * sizeof(Block));
+    snake[0] = Block(spos, test_texture, block_scale);
     KeyMap keyboard = KeyMap();
 
 	// game loop
@@ -71,6 +67,10 @@ int main(int argc, char* args[]) {
                 scancode = event.key.keysym.scancode;
                 if (scancode == keyboard.f_back) {
                     game_running = false;
+                }
+                if (scancode == keyboard.f_select) {
+                    snake[snake_size] = Block(snake[snake_size-1].getSPos(), test_texture, block_scale);
+                    snake_size++;
                 }
                 if (scancode == keyboard.f_up && spos.f_y > 0) {
                     svel = Vector2(0,-1);
@@ -113,6 +113,7 @@ int main(int argc, char* args[]) {
 	}
 
 	// close game
+    free(snake);
 	window.close();
 	SDL_Quit();
 	return 0;
