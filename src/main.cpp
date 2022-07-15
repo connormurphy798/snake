@@ -34,27 +34,39 @@ int main(int argc, char* args[]) {
 	RenderWindow window = RenderWindow(win_name, win_w, win_h);
     KeyMap keyboard = KeyMap();
 
-    int x = 4;
-    int y = 4;
+    int block_scale = 4;    // 1 block = 2^4 by 2^4 pixels
+    Vector2 spos = Vector2(6, 7);
+    Vector2 pos = spos.scale2(block_scale);
 	SDL_Texture* test_texture = window.loadTexture("res/img/test1.png");
-    //Entity guy = Entity(Vector2(x, y), test_texture);
-    Block guy = Block(Vector2(x,y), test_texture);
-
+    Block guy = Block(spos, test_texture, block_scale);
 
 	// game loop
 	bool game_running = true;
 	SDL_Event event;
     SDL_Scancode scancode;
 	while (game_running) {
-		// poll for quit event
 		while (SDL_PollEvent(&event)) {
+            // check for quit event
 			if (event.type == SDL_QUIT) {
 				game_running = false;
 			}
+            // check for button press
             if (event.type == SDL_KEYDOWN) {
                 scancode = event.key.keysym.scancode;
                 if (scancode == keyboard.f_back) {
                     game_running = false;
+                }
+                if (scancode == keyboard.f_up) {
+                    guy.incrementSY(-1);
+                }
+                if (scancode == keyboard.f_down) {
+                    guy.incrementSY(1);
+                }
+                if (scancode == keyboard.f_left) {
+                    guy.incrementSX(-1);
+                }
+                if (scancode == keyboard.f_right) {
+                    guy.incrementSX(1);
                 }
             }     
         }
@@ -62,8 +74,10 @@ int main(int argc, char* args[]) {
  		window.clear();
 
         window.render(guy);
+        spos = guy.getSPos();
+        pos = guy.getPos();
+        guy.printPos(0);
 
-        std::cout << Utils::upTimeSeconds() << std::endl;
 
  		window.display();
 	}

@@ -1,6 +1,6 @@
 #include "Block.hpp"
 
-Block::Block() : f_spos(Vector2(0,0)) { 
+Block::Block() : f_spos(Vector2(0,0)), f_scale2(0) { 
     f_pos = Vector2(0,0);
 
     f_texture = nullptr;
@@ -11,8 +11,8 @@ Block::Block() : f_spos(Vector2(0,0)) {
 	f_current_frame.h = 0;
 }
 
-Block::Block(Vector2 p_spos, SDL_Texture* p_texture) : f_spos(p_spos) { 
-    f_pos = f_spos.scale2(4);
+Block::Block(Vector2 p_spos, SDL_Texture* p_texture, int p_scale2) : f_spos(p_spos), f_scale2(p_scale2) { 
+    updatePos();
 
     f_texture = p_texture;
 	
@@ -29,4 +29,36 @@ Vector2& Block::getSPos() {
 void Block::setSPos(Vector2 p_spos) {
     f_spos = p_spos;
     f_pos = p_spos.scale2(4);
+}
+
+int Block::incrementSX(int p_dx) {
+    f_spos.f_x += p_dx;
+    updateX();
+    return f_spos.f_x; 
+}
+
+int Block::incrementSY(int p_dy) {
+    f_spos.f_y += p_dy;
+    updateY();
+    return f_spos.f_y; 
+}
+
+Vector2& Block::incrementSPos(Vector2 p_d) {
+    f_spos = f_spos + p_d;
+    updatePos();
+    return f_spos;
+}
+
+void Block::printPos(int p_pos_type) {
+    switch (p_pos_type) {
+        case 0:     // spos + pos
+            std::cout << "SPos: (" << f_spos.f_x << ", " << f_spos.f_y << "),   " << "Pos: (" << f_pos.f_x << ", " << f_pos.f_y << ")  " << std::endl;
+            break;
+        case 1:     // spos only
+            std::cout << "SPos: (" << f_spos.f_x << ", " << f_spos.f_y << ")" << std::endl;
+            break;
+        case 2:     // pos only
+            std::cout << "Pos: (" << f_pos.f_x << ", " << f_pos.f_y << ")  " << std::endl;
+            break;
+    }
 }
