@@ -15,7 +15,7 @@ namespace Utils {
         return (p_a < p_b) ? p_a : p_b;
     }
 
-    inline int mid(int p_a, int p_b, int p_c) {
+    inline int mid(int p_a, int p_b, int p_c) { // dependent on that p_a < p_c OR p_b < p_c
         return min(max(p_a, p_b), p_c);
     }
 };

@@ -42,7 +42,13 @@ int main(int argc, char* args[]) {
     Vector2 spos = Vector2(3, 11); // position scaled to block size
     Vector2 pos = spos.scale2(block_scale);
 	SDL_Texture* test_texture = window.loadTexture("res/img/test1.png");
-    Block guy = Block(spos, test_texture, block_scale);
+    int snake_size = 4;
+    Block snake[snake_size] = {
+        Block(spos, test_texture, block_scale),
+        Block(spos, test_texture, block_scale),
+        Block(spos, test_texture, block_scale),
+        Block(spos, test_texture, block_scale)
+    };
     KeyMap keyboard = KeyMap();
 
 	// game loop
@@ -82,17 +88,25 @@ int main(int argc, char* args[]) {
         }
 
         next_time = (unsigned long long) (Utils::upTimeSeconds() * timestep);
+        // limit update rate
         if (next_time > curr_time) {
-            guy.incrementSPos(svel, block_limits);
+            // update body blocks from back to front
+            for (int i=snake_size; i>0; i--) {
+                snake[i].setSPos(snake[i-1].getSPos());
+            }
+            // update head
+            snake[0].incrementSPos(svel, block_limits);
             curr_time = next_time;
         }
 
  		window.clear();
 
-        window.render(guy);
-        spos = guy.getSPos();
-        pos = guy.getPos();
-        guy.printPos(0);
+        for (int i=0; i<snake_size; i++) {
+            window.render(snake[i]);
+        } 
+        spos = snake[0].getSPos();
+        pos = snake[0].getPos();
+        
 
 
  		window.display();

@@ -7,6 +7,8 @@ struct Vector2 {
 
     Vector2(int p_x, int p_y);
 
+    bool operator==(Vector2 p_a);
+
     Vector2 operator+(Vector2 p_a);
 
     inline Vector2 scale2(int p_n) {
