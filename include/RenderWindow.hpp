@@ -8,7 +8,7 @@
 
 class RenderWindow {
 public:
-	RenderWindow(const char* p_title, int p_width, int p_height);
+	RenderWindow(const char* p_title, int p_width, int p_height, int p_scale);
 
 	SDL_Texture* loadTexture(const char* p_filepath);
 
@@ -23,4 +23,5 @@ public:
 private:
 	SDL_Window*		f_window;
 	SDL_Renderer*	f_renderer;
+    int             f_scale;        // display scaled by 2**f_scale
 };

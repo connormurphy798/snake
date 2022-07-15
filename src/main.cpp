@@ -29,9 +29,10 @@ int main(int argc, char* args[]) {
 
 	// game setup
 	char win_name[] = "Snake v0.0";
-	int win_w = 512;	//  NES resolution, 
-	int win_h = 480;	//	scaled up by 2
-	RenderWindow window = RenderWindow(win_name, win_w, win_h);
+	int win_w = 256;
+	int win_h = 240;
+    int win_scale = 1;
+	RenderWindow window = RenderWindow(win_name, win_w, win_h, win_scale);
     KeyMap keyboard = KeyMap();
 
     int block_scale = 4;    // 1 block = 2^4 by 2^4 pixels
@@ -56,16 +57,16 @@ int main(int argc, char* args[]) {
                 if (scancode == keyboard.f_back) {
                     game_running = false;
                 }
-                if (scancode == keyboard.f_up) {
+                if (scancode == keyboard.f_up && spos.f_y > 0) {
                     guy.incrementSY(-1);
                 }
-                if (scancode == keyboard.f_down) {
+                if (scancode == keyboard.f_down  && spos.f_y < 14) {
                     guy.incrementSY(1);
                 }
-                if (scancode == keyboard.f_left) {
+                if (scancode == keyboard.f_left && spos.f_x > 0) {
                     guy.incrementSX(-1);
                 }
-                if (scancode == keyboard.f_right) {
+                if (scancode == keyboard.f_right && spos.f_x < 15s) {
                     guy.incrementSX(1);
                 }
             }     
