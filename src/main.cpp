@@ -29,17 +29,20 @@ int main(int argc, char* args[]) {
 
 	// game setup
 	char win_name[] = "Snake v0.0";
-	int win_w = 256;
-	int win_h = 240;
-    int win_scale = 1;
+	const int win_w = 256;
+	const int win_h = 240;
+    const int win_scale = 1;
 	RenderWindow window = RenderWindow(win_name, win_w, win_h, win_scale);
-    KeyMap keyboard = KeyMap();
+    
+    const int block_scale = 4;    // 1 block = 2^4 by 2^4 pixels
+    const int win_block_w = win_w >> block_scale;
+    const int win_block_h = win_h >> block_scale;
 
-    int block_scale = 4;    // 1 block = 2^4 by 2^4 pixels
-    Vector2 spos = Vector2(6, 7);
+    Vector2 spos = Vector2(6, 7); // position scaled to block size
     Vector2 pos = spos.scale2(block_scale);
 	SDL_Texture* test_texture = window.loadTexture("res/img/test1.png");
     Block guy = Block(spos, test_texture, block_scale);
+    KeyMap keyboard = KeyMap();
 
 	// game loop
 	bool game_running = true;
@@ -60,13 +63,13 @@ int main(int argc, char* args[]) {
                 if (scancode == keyboard.f_up && spos.f_y > 0) {
                     guy.incrementSY(-1);
                 }
-                if (scancode == keyboard.f_down  && spos.f_y < 14) {
+                if (scancode == keyboard.f_down  && spos.f_y < win_block_h-1) {
                     guy.incrementSY(1);
                 }
                 if (scancode == keyboard.f_left && spos.f_x > 0) {
                     guy.incrementSX(-1);
                 }
-                if (scancode == keyboard.f_right && spos.f_x < 15) {
+                if (scancode == keyboard.f_right && spos.f_x < win_block_w-1) {
                     guy.incrementSX(1);
                 }
             }     
