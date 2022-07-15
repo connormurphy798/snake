@@ -38,14 +38,19 @@ int main(int argc, char* args[]) {
     const int win_block_w = win_w >> block_scale;
     const int win_block_h = win_h >> block_scale;
 
-    Vector2 spos = Vector2(6, 7); // position scaled to block size
+    Vector2 spos = Vector2(3, 11); // position scaled to block size
     Vector2 pos = spos.scale2(block_scale);
 	SDL_Texture* test_texture = window.loadTexture("res/img/test1.png");
     Block guy = Block(spos, test_texture, block_scale);
     KeyMap keyboard = KeyMap();
 
 	// game loop
+    unsigned long long curr_time = 0;
+    unsigned long long next_time = 0;
+    float timestep = 5.0f;  // position updates every 1.0/timestep seconds 
+
 	bool game_running = true;
+    Vector2 svel = Vector2(0,0);
 	SDL_Event event;
     SDL_Scancode scancode;
 	while (game_running) {
@@ -61,20 +66,26 @@ int main(int argc, char* args[]) {
                     game_running = false;
                 }
                 if (scancode == keyboard.f_up && spos.f_y > 0) {
-                    guy.incrementSY(-1);
+                    svel = Vector2(0,-1);
                 }
                 if (scancode == keyboard.f_down  && spos.f_y < win_block_h-1) {
-                    guy.incrementSY(1);
+                    svel = Vector2(0,1);
                 }
                 if (scancode == keyboard.f_left && spos.f_x > 0) {
-                    guy.incrementSX(-1);
+                    svel = Vector2(-1,0);
                 }
                 if (scancode == keyboard.f_right && spos.f_x < win_block_w-1) {
-                    guy.incrementSX(1);
+                    svel = Vector2(1,0);
                 }
             }     
         }
- 	
+
+        next_time = (unsigned long long) (Utils::upTimeSeconds() * timestep);
+        if (next_time > curr_time) {
+            guy.incrementSPos(svel);
+            curr_time = next_time;
+        }
+
  		window.clear();
 
         window.render(guy);
