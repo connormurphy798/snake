@@ -66,7 +66,7 @@ int main(int argc, char* args[]) {
                 if (scancode == keyboard.f_left && spos.f_x > 0) {
                     guy.incrementSX(-1);
                 }
-                if (scancode == keyboard.f_right && spos.f_x < 15s) {
+                if (scancode == keyboard.f_right && spos.f_x < 15) {
                     guy.incrementSX(1);
                 }
             }     
