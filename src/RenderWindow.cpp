@@ -37,8 +37,8 @@ void RenderWindow::render(Entity& p_entity) {
 
 	// display is scaled by 2 in x and y directions
 	SDL_Rect dst;
-	dst.x = p_entity.getX() << 1;
-	dst.y = p_entity.getY() << 1;
+	dst.x = p_entity.getPos().f_x << 1;
+	dst.y = p_entity.getPos().f_y << 1;
 	dst.w = src.w << 1;
 	dst.h = src.h << 1;
 

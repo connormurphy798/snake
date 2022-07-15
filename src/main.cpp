@@ -12,6 +12,7 @@
 #include "Entity.hpp"
 #include "KeyMap.hpp"
 #include "Utils.hpp"
+#include "Block.hpp"
 
 
 int main(int argc, char* args[]) {
@@ -33,10 +34,11 @@ int main(int argc, char* args[]) {
 	RenderWindow window = RenderWindow(win_name, win_w, win_h);
     KeyMap keyboard = KeyMap();
 
-    int x = 12;
-    int y = 12;
+    int x = 4;
+    int y = 4;
 	SDL_Texture* test_texture = window.loadTexture("res/img/test1.png");
-    Entity guy = Entity(x, y, test_texture);
+    //Entity guy = Entity(Vector2(x, y), test_texture);
+    Block guy = Block(Vector2(x,y), test_texture);
 
 
 	// game loop
