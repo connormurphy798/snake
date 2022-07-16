@@ -10,6 +10,8 @@ struct Vector2 {
 
     bool operator==(Vector2 p_a);
 
+    bool operator!=(Vector2 p_a);
+
     Vector2 operator+(Vector2 p_a);
 
     inline Vector2 scale2(int p_n) {

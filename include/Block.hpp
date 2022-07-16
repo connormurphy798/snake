@@ -23,7 +23,7 @@ public:
 
     Vector2& incrementSPos(Vector2 p_d);
 
-    Vector2& incrementSPos(Vector2 p_d, const int* p_limits); // {T, B, L, R}
+    bool incrementSPos(Vector2 p_d, const int* p_limits); // {T, B, L, R}
 
     void printPos(int p_pos_type);
 

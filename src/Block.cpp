@@ -49,14 +49,13 @@ Vector2& Block::incrementSPos(Vector2 p_d) {
     return f_spos;
 }
 
-Vector2& Block::incrementSPos(Vector2 p_d, const int* p_limits) {
+bool Block::incrementSPos(Vector2 p_d, const int* p_limits) {
     Vector2 spos_buffer = f_spos + p_d;
-    setSPos(Vector2(
-        Utils::mid(p_limits[2], spos_buffer.f_x, p_limits[3]),
-        Utils::mid(p_limits[0], spos_buffer.f_y, p_limits[1])
-    ));
+    int x = Utils::mid(p_limits[2], spos_buffer.f_x, p_limits[3]);
+    int y = Utils::mid(p_limits[0], spos_buffer.f_y, p_limits[1]);
+    setSPos(Vector2(x,y));
     updatePos();
-    return f_spos;
+    return (x != spos_buffer.f_x) || (y != spos_buffer.f_y);  // returns true if increment was blocked by limits
 }
 
 void Block::printPos(int p_pos_type) {

@@ -41,7 +41,7 @@ int main(int argc, char* args[]) {
     }
 
     // game setup
-    char win_name[] = "Snake v0.2";
+    char win_name[] = "Snake v0.3";
     const int win_w = 256;
     const int win_h = 240;
     const int win_scale = 1;
@@ -51,10 +51,10 @@ int main(int argc, char* args[]) {
     const int win_block_w = win_w >> block_scale;   
     const int win_block_h = win_h >> block_scale;
     const int num_blocks = win_block_h * win_block_w;
-    const int block_limits[4] = {0, win_block_h-1, 0, win_block_w-1};
 
     // initialize the snake
     Vector2 head_spos = Vector2(3, 11); // position scaled to block size
+    Vector2 head_spos_buffer;
     SDL_Texture* snake_texture = window.loadTexture("res/img/test1.png");
     int snake_size = 1;
     Block* snake = (Block*) malloc(num_blocks * sizeof(Block));
@@ -80,33 +80,42 @@ int main(int argc, char* args[]) {
     unsigned long long next_time = 0;
     float timestep = 10.0f;  // position updates every 1.0/timestep seconds 
 
+    int dir = 0;
+    const Vector2 dir_none  = Vector2( 0,  0);
+    const Vector2 dir_up    = Vector2( 0, -1);
+    const Vector2 dir_down  = Vector2( 0,  1);
+    const Vector2 dir_left  = Vector2(-1,  0);
+    const Vector2 dir_right = Vector2( 1,  0);
+
     bool game_running = true;
-    Vector2 svel = Vector2(0,0);
+    bool wall_collision = false;
+    bool self_collision = false;
+    Vector2 svel = dir_none; 
     SDL_Event event;
     SDL_Scancode scancode;
 	while (game_running) {
-		while (SDL_PollEvent(&event)) {
+        if (SDL_PollEvent(&event)) {
             // check for quit event
-			if (event.type == SDL_QUIT) {
-				game_running = false;
-			}
+            if (event.type == SDL_QUIT) {
+                game_running = false;
+            }
             // check for button press
             if (event.type == SDL_KEYDOWN) {
                 scancode = event.key.keysym.scancode;
                 if (scancode == keyboard.f_back) {
                     game_running = false;
                 }
-                if (scancode == keyboard.f_up && head_spos.f_y > 0) {
-                    svel = Vector2(0,-1);
+                if (scancode == keyboard.f_up) {
+                    dir = 1;
                 }
-                if (scancode == keyboard.f_down  && head_spos.f_y < win_block_h-1) {
-                    svel = Vector2(0,1);
+                else if (scancode == keyboard.f_down) {
+                    dir = 2;
                 }
-                if (scancode == keyboard.f_left && head_spos.f_x > 0) {
-                    svel = Vector2(-1,0);
+                else if (scancode == keyboard.f_left) {
+                    dir = 3;
                 }
-                if (scancode == keyboard.f_right && head_spos.f_x < win_block_w-1) {
-                    svel = Vector2(1,0);
+                else if (scancode == keyboard.f_right) {
+                    dir = 4;
                 }
             }     
         }
@@ -114,15 +123,42 @@ int main(int argc, char* args[]) {
         next_time = (unsigned long long) (Utils::upTimeSeconds() * timestep);
         // limit update rate
         if (next_time > curr_time) {
+            // convert keyboard input into velocity
+            if (dir == 1 && svel != dir_down) {
+                svel = dir_up;
+            }
+            else if (dir == 2  && svel != dir_up) {
+                svel = dir_down;
+            }
+            else if (dir == 3 && svel != dir_right) {
+                svel = dir_left;
+            }
+            else if (dir == 4 && svel != dir_left) {
+                svel = dir_right;
+            }
+
+            // calculate proposed new head + check collisions
+            head_spos_buffer = head_spos + svel;
+            wall_collision = (head_spos_buffer.f_x < 0) || (head_spos_buffer.f_x >= win_block_w) || (head_spos_buffer.f_y < 0) || (head_spos_buffer.f_y >= win_block_h);
+            if (wall_collision) {
+                std::cout << "WALL COLLISION" << std::endl;
+                continue;
+            }
+            self_collision = available_blocks.find(Utils::vectorToBlockNum(head_spos_buffer, win_block_w)) == available_blocks.end() && svel != dir_none;
+            if (self_collision) {
+                std::cout << "SELF COLLISION" << std::endl;
+                continue;
+            }
+
             // update body blocks from back to front
             available_blocks.insert(Utils::vectorToBlockNum(snake[snake_size-1].getSPos(), win_block_w));
             for (int i=snake_size-1; i>0; i--) {
                 snake[i].setSPos(snake[i-1].getSPos());
             }
 
-            // update head
-            snake[0].incrementSPos(svel, block_limits);
-            head_spos = snake[0].getSPos();
+            // update head position
+            snake[0].setSPos(head_spos_buffer);
+            head_spos = head_spos_buffer;
             available_blocks.erase(Utils::vectorToBlockNum(head_spos, win_block_w));
 
             // handle eating
