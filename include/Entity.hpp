@@ -9,11 +9,11 @@ class Entity {
 public:
     Entity();
 
-    Entity(Vector2 p_pos, SDL_Texture* p_texture);
+    Entity(Vector2 pos, SDL_Texture* texture);
 
     Vector2& getPos();
 
-    void setPos(Vector2 p_pos);
+    void setPos(Vector2 pos);
 
 	SDL_Rect getCurrentFrame();
 

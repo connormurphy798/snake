@@ -12,15 +12,15 @@ KeyMap::KeyMap() {
     f_back   = SDL_SCANCODE_LSHIFT;
 }
 
-KeyMap::KeyMap(SDL_Scancode* p_scancodes) {
-    if (!p_scancodes) {
+KeyMap::KeyMap(SDL_Scancode* scancodes) {
+    if (!scancodes) {
         std::cout << "error: null scancodes used in keymap" << std::endl;
     }
-    f_up     = p_scancodes[0];
-    f_down   = p_scancodes[1];
-    f_left   = p_scancodes[2];
-    f_right  = p_scancodes[3];
-    f_select = p_scancodes[4];
-    f_option = p_scancodes[5];
-    f_back   = p_scancodes[6];
+    f_up     = scancodes[0];
+    f_down   = scancodes[1];
+    f_left   = scancodes[2];
+    f_right  = scancodes[3];
+    f_select = scancodes[4];
+    f_option = scancodes[5];
+    f_back   = scancodes[6];
 }

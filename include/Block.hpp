@@ -11,21 +11,21 @@ class Block : public Entity {
 public:
     Block();
 
-    Block(Vector2 p_spos, SDL_Texture* p_texture, int p_scale2);
+    Block(Vector2 spos, SDL_Texture* texture, int scale2);
 
     Vector2& getSPos();
 
-    void setSPos(Vector2 p_spos);
+    void setSPos(Vector2 spos);
 
-    int incrementSX(int p_dx);
+    int incrementSX(int dx);
 
-    int incrementSY(int p_dy);
+    int incrementSY(int dy);
 
-    Vector2& incrementSPos(Vector2 p_d);
+    Vector2& incrementSPos(Vector2 v);
 
-    bool incrementSPos(Vector2 p_d, const int* p_limits); // {T, B, L, R}
+    bool incrementSPos(Vector2 v, const int* limits); // {T, B, L, R}
 
-    void printPos(int p_pos_type);
+    void printPos(int pos_type);
 
 protected:
     Vector2 f_spos;

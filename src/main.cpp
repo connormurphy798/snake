@@ -17,10 +17,10 @@
 
 
 template <class T>
-void printNotInSet(const std::unordered_set<T>* p_set, const T* p_elements, int p_num) {
-    for (int i=0; i<p_num; i++) {
-        if (!p_set->count(p_elements[i])) {
-            std::cout << p_elements[i] << " not in provided set" << std::endl; 
+void printNotInSet(const std::unordered_set<T>* set, const T* elements, int num) {
+    for (int i=0; i<num; i++) {
+        if (!set->count(elements[i])) {
+            std::cout << elements[i] << " not in provided set" << std::endl; 
         }
     }
     std::cout << "all elements checked\n" << std::endl;

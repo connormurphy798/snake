@@ -8,13 +8,13 @@
 
 class RenderWindow {
 public:
-	RenderWindow(const char* p_title, int p_width, int p_height, int p_scale);
+	RenderWindow(const char* title, int width, int height, int scale);
 
-	SDL_Texture* loadTexture(const char* p_filepath);
+	SDL_Texture* loadTexture(const char* filepath);
 
 	void clear();
 
-	void render(Entity& p_entity);
+	void render(Entity& entity);
 
 	void display();
 

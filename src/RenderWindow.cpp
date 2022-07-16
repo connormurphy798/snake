@@ -1,9 +1,9 @@
 #include "RenderWindow.hpp"
 
-RenderWindow::RenderWindow(const char* p_title, int p_width, int p_height, int p_scale) : f_window(NULL), f_renderer(NULL), f_scale(p_scale) {
+RenderWindow::RenderWindow(const char* title, int width, int height, int scale) : f_window(NULL), f_renderer(NULL), f_scale(scale) {
 
 	// initialize window
-	f_window = SDL_CreateWindow(p_title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, p_width << f_scale, p_height << f_scale, SDL_WINDOW_SHOWN);
+	f_window = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width << f_scale, height << f_scale, SDL_WINDOW_SHOWN);
 	if (!f_window) {
 		std::cout << "SDL failed to create window. Error: " << SDL_GetError() << std::endl;
 	}
@@ -17,9 +17,9 @@ RenderWindow::RenderWindow(const char* p_title, int p_width, int p_height, int p
 }
 
 
-SDL_Texture* RenderWindow::loadTexture(const char* p_filepath) {
+SDL_Texture* RenderWindow::loadTexture(const char* filepath) {
 	SDL_Texture* texture = NULL;
-	texture = IMG_LoadTexture(f_renderer, p_filepath);
+	texture = IMG_LoadTexture(f_renderer, filepath);
 	if (!texture) {
 		std::cout << "Failed to load texture. Error: " << SDL_GetError() << std::endl;
 	}
@@ -32,16 +32,16 @@ void RenderWindow::clear() {
 }
 
 
-void RenderWindow::render(Entity& p_entity) {
-	SDL_Rect src = p_entity.getCurrentFrame();
+void RenderWindow::render(Entity& entity) {
+	SDL_Rect src = entity.getCurrentFrame();
 	SDL_Rect dst;
     
-	dst.x = p_entity.getPos().f_x << f_scale;
-	dst.y = p_entity.getPos().f_y << f_scale;
+	dst.x = entity.getPos().f_x << f_scale;
+	dst.y = entity.getPos().f_y << f_scale;
 	dst.w = src.w << f_scale;
 	dst.h = src.h << f_scale;
 
-	SDL_RenderCopy(f_renderer, p_entity.getTexture(), &src, &dst);
+	SDL_RenderCopy(f_renderer, entity.getTexture(), &src, &dst);
 }
 
 

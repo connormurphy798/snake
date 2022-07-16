@@ -6,16 +6,16 @@
 struct Vector2 {
     Vector2();
 
-    Vector2(int p_x, int p_y);
+    Vector2(int x, int y);
 
-    bool operator==(Vector2 p_a);
+    bool operator==(Vector2 v);
 
-    bool operator!=(Vector2 p_a);
+    bool operator!=(Vector2 v);
 
-    Vector2 operator+(Vector2 p_a);
+    Vector2 operator+(Vector2 v);
 
-    inline Vector2 scale2(int p_n) {
-        return Vector2(f_x << p_n, f_y << p_n);
+    inline Vector2 scale2(int n) {
+        return Vector2(f_x << n, f_y << n);
     };
 
     void printCoords();

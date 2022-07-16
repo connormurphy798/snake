@@ -5,7 +5,7 @@
 struct KeyMap {
     KeyMap();
 
-    KeyMap(SDL_Scancode* p_scancodes);
+    KeyMap(SDL_Scancode* scancodes);
 
     SDL_Scancode f_up;
     SDL_Scancode f_down;
