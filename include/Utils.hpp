@@ -3,6 +3,7 @@
 #include <SDL2/SDL.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <unordered_set>
 
 namespace Utils {
     inline float upTimeSeconds() {
@@ -39,8 +40,21 @@ namespace Utils {
         return twoToThe(p_n) - 1;
     }
 
-    inline Vector2 randVectorInSpace(int p_space_size, int p_log2w) {
-        int rand_blocknum = rand() % p_space_size;
-        return Vector2(rand_blocknum & Utils::ones(p_log2w), rand_blocknum >> p_log2w); // (blocknum % w, blocknum / w)
+    inline int vectorToBlockNum(Vector2 p_v, int p_w) {
+        return p_w * p_v.f_y + p_v.f_x;
+    }
+
+    inline Vector2 blockNumToVector(int p_block, int p_w) {
+        return Vector2(p_block % p_w, p_block / p_w);
+    }
+
+    template <class T>
+    inline T randElementInSet(const std::unordered_set<T>* p_set) {
+        int random = rand() % p_set->size();
+        auto iter = p_set->begin();
+        for (int i=0; i<random; i++) {
+            iter++;
+        }
+        return *iter;
     }
 };
