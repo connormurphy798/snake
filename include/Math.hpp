@@ -14,6 +14,10 @@ struct Vector2 {
 
     Vector2 operator+(Vector2 v);
 
+    Vector2 operator-(Vector2 v);
+
+    int operator*(Vector2 v);
+
     inline Vector2 scale2(int n) {
         return Vector2(f_x << n, f_y << n);
     };

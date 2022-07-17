@@ -11,11 +11,15 @@ public:
 
     Entity(Vector2 pos, SDL_Texture* texture);
 
+    Entity(Vector2 pos, SDL_Texture* texture, Vector2 texture_offset, Vector2 texture_size);
+
     Vector2& getPos();
 
     void setPos(Vector2 pos);
 
 	SDL_Rect getCurrentFrame();
+
+    void setCurrentFrame(Vector2 offset, Vector2 size);
 
 	SDL_Texture* getTexture();
 

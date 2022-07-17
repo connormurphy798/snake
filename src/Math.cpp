@@ -18,6 +18,18 @@ Vector2 Vector2::operator+(Vector2 v) {
     return Vector2(x, y);
 }
 
+int Vector2::operator*(Vector2 v) {
+    return f_x*v.f_x + f_y*v.f_y;
+}
+
+Vector2 Vector2::operator-(Vector2 v) {
+    int x = f_x - v.f_x;
+    int y = f_y - v.f_y;
+    return Vector2(x, y);
+}
+
 void Vector2::printCoords() {
     std::cout << f_x << ", " << f_y << std::endl;
 }
+
+

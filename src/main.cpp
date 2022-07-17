@@ -47,25 +47,39 @@ int main(int argc, char* args[]) {
     const int win_scale = 1;
     RenderWindow window = RenderWindow(win_name, win_w, win_h, win_scale);
     
-    const int block_scale = 4;    // 1 block = 2^4 by 2^4 pixels
+    const int block_size = 16;
+    const int block_scale = Utils::log2(block_size);
     const int win_block_w = win_w >> block_scale;   
     const int win_block_h = win_h >> block_scale;
     const int num_blocks = win_block_h * win_block_w;
 
+    // constants denoting texture positions on sprite sheet
+    const Vector2 sprite_h_u  = Vector2( 0,  0);    const Vector2 sprite_h_d  = Vector2( 16,  0);
+    const Vector2 sprite_h_l  = Vector2( 0,  16);   const Vector2 sprite_h_r  = Vector2( 16,  16);
+    const Vector2 sprite_b_v  = Vector2( 0,  32);   const Vector2 sprite_b_h  = Vector2( 16,  32);
+    const Vector2 sprite_b_r0 = Vector2( 0,  48);   const Vector2 sprite_b_r1 = Vector2( 16,  48);
+    const Vector2 sprite_b_r2 = Vector2( 0,  64);   const Vector2 sprite_b_r3 = Vector2( 16,  64);
+    const Vector2 block_dim = Vector2(block_size, block_size);
+
     // initialize the snake
-    Vector2 head_spos = Vector2(3, 11); // position scaled to block size
+    Vector2 head_spos = Vector2(5, 5); // position scaled to block size
     Vector2 head_spos_buffer;
-    SDL_Texture* snake_texture = window.loadTexture("res/img/test1.png");
-    int snake_size = 1;
+    SDL_Texture* snake_sprites = window.loadTexture("res/img/snake_body.png");
+    int snake_size = 3;
     Block* snake = (Block*) malloc(num_blocks * sizeof(Block));
-    snake[0] = Block(head_spos, snake_texture, block_scale);
+    snake[0] = Block(head_spos,                  snake_sprites, sprite_h_r, block_dim, block_scale);
+    snake[1] = Block(head_spos + Vector2(-1, 0), snake_sprites, sprite_b_h, block_dim, block_scale);
+    snake[2] = Block(head_spos + Vector2(-2, 0), snake_sprites, sprite_h_l, block_dim, block_scale);
+
 
     // create set of available blocks, 0 to num_blocks-1
     std::unordered_set<unsigned short> available_blocks;
     for (unsigned short i=0; i<num_blocks; i++) {
         available_blocks.insert(i);
     }
-    available_blocks.erase(Utils::vectorToBlockNum(head_spos, win_block_w));
+    available_blocks.erase(Utils::vectorToBlockNum(head_spos,                  win_block_w));
+    available_blocks.erase(Utils::vectorToBlockNum(head_spos + Vector2(-1, 0), win_block_w));
+    available_blocks.erase(Utils::vectorToBlockNum(head_spos + Vector2(-2, 0), win_block_w));
 
 
     // generate random food position
@@ -90,7 +104,7 @@ int main(int argc, char* args[]) {
     bool game_running = true;
     bool wall_collision = false;
     bool self_collision = false;
-    Vector2 svel = dir_none; 
+    Vector2 svel = dir_none;
     SDL_Event event;
     SDL_Scancode scancode;
 	while (game_running) {
@@ -137,39 +151,86 @@ int main(int argc, char* args[]) {
                 svel = dir_right;
             }
 
-            // calculate proposed new head + check collisions
-            head_spos_buffer = head_spos + svel;
-            wall_collision = (head_spos_buffer.f_x < 0) || (head_spos_buffer.f_x >= win_block_w) || (head_spos_buffer.f_y < 0) || (head_spos_buffer.f_y >= win_block_h);
-            if (wall_collision) {
-                std::cout << "WALL COLLISION" << std::endl;
-                continue;
-            }
-            self_collision = available_blocks.find(Utils::vectorToBlockNum(head_spos_buffer, win_block_w)) == available_blocks.end() && svel != dir_none;
-            if (self_collision) {
-                std::cout << "SELF COLLISION" << std::endl;
-                continue;
-            }
-
-            // update body blocks from back to front
-            available_blocks.insert(Utils::vectorToBlockNum(snake[snake_size-1].getSPos(), win_block_w));
-            for (int i=snake_size-1; i>0; i--) {
-                snake[i].setSPos(snake[i-1].getSPos());
-            }
-
-            // update head position
-            snake[0].setSPos(head_spos_buffer);
-            head_spos = head_spos_buffer;
-            available_blocks.erase(Utils::vectorToBlockNum(head_spos, win_block_w));
-
-            // handle eating
-            if (head_spos == food.getSPos()) {
-                food.setSPos(Utils::blockNumToVector(Utils::randElementInSet(&available_blocks), win_block_w));
-                snake[snake_size] = Block(snake[snake_size-1].getSPos(), snake_texture, block_scale);
-                snake_size++;
-                if (snake_size == num_blocks) {
-                    game_running = false;
+            if (svel != dir_none) {
+                // calculate proposed new head + check collisions
+                head_spos_buffer = head_spos + svel;
+                wall_collision = (head_spos_buffer.f_x < 0) || (head_spos_buffer.f_x >= win_block_w) || (head_spos_buffer.f_y < 0) || (head_spos_buffer.f_y >= win_block_h);
+                if (wall_collision) {
+                    std::cout << "WALL COLLISION" << std::endl;
+                    continue;
                 }
+                self_collision = available_blocks.find(Utils::vectorToBlockNum(head_spos_buffer, win_block_w)) == available_blocks.end() && svel != dir_none;
+                if (self_collision) {
+                    std::cout << "SELF COLLISION" << std::endl;
+                    continue;
+                }
+
+                // update body blocks from back to front
+                available_blocks.insert(Utils::vectorToBlockNum(snake[snake_size-1].getSPos(), win_block_w));
+                for (int i=snake_size-1; i>0; i--) {
+                    snake[i].setSPos(snake[i-1].getSPos());
+                }
+
+                // update head position
+                snake[0].setSPos(head_spos_buffer);
+                head_spos = head_spos_buffer;
+                available_blocks.erase(Utils::vectorToBlockNum(head_spos, win_block_w));
+
+                // handle eating
+                if (head_spos == food.getSPos()) {
+                    food.setSPos(Utils::blockNumToVector(Utils::randElementInSet(&available_blocks), win_block_w));
+                    snake[snake_size] = Block(snake[snake_size-1].getSPos(), snake_sprites, block_scale);
+                    snake_size++;
+                    if (snake_size == num_blocks) {
+                        game_running = false;
+                    }
+                }
+
+                // update sprite data in 4 steps
+                // step 1: head (snake[0])
+                if      (svel == dir_up)    snake[0].setCurrentFrame(sprite_h_u, block_dim);
+                else if (svel == dir_down)  snake[0].setCurrentFrame(sprite_h_d, block_dim);
+                else if (svel == dir_left)  snake[0].setCurrentFrame(sprite_h_l, block_dim);
+                else if (svel == dir_right) snake[0].setCurrentFrame(sprite_h_r, block_dim);
+
+                // step 2: body (snake[2:snake_size-1])
+
+                // step 3: tail (snake[snake_size-1])
+                Vector2 delta = snake[snake_size-2].getSPos() - snake[snake_size-1].getSPos();
+                if      (delta == dir_up)    snake[snake_size-1].setCurrentFrame(sprite_h_d, block_dim);
+                else if (delta == dir_down)  snake[snake_size-1].setCurrentFrame(sprite_h_u, block_dim);
+                else if (delta == dir_left)  snake[snake_size-1].setCurrentFrame(sprite_h_r, block_dim);
+                else if (delta == dir_right) snake[snake_size-1].setCurrentFrame(sprite_h_l, block_dim);
+
+                // step 4: neck (snake[1])
+                Vector2 a = snake[0].getSPos();
+                Vector2 b = snake[2].getSPos();
+                Vector2 ba = a-b;
+                if (ba.f_x == 0 || ba.f_y == 0) {   // straight
+                    if (ba.f_x == 0)
+                        snake[1].setCurrentFrame(sprite_b_v, block_dim);
+                    else
+                        snake[1].setCurrentFrame(sprite_b_h, block_dim);
+                } else {               // curved
+                    int neck_y = snake[1].getSPos().f_y;
+                    int min_y = Utils::min(a.f_y, b.f_y);
+                    if (ba.f_x != ba.f_y) { // positive slope
+                        if (neck_y == min_y)
+                            snake[1].setCurrentFrame(sprite_b_r0, block_dim);
+                        else
+                            snake[1].setCurrentFrame(sprite_b_r3, block_dim);
+                    } else {                // negative slope
+                        if (neck_y == min_y)
+                            snake[1].setCurrentFrame(sprite_b_r1, block_dim);
+                        else
+                            snake[1].setCurrentFrame(sprite_b_r2, block_dim);
+                    }
+
+                }   
+
             }
+
+            
 
             curr_time = next_time;
         }

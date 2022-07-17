@@ -13,6 +13,8 @@ public:
 
     Block(Vector2 spos, SDL_Texture* texture, int scale2);
 
+    Block(Vector2 spos, SDL_Texture* texture, Vector2 texture_offset, Vector2 texture_size, int scale2);
+
     Vector2& getSPos();
 
     void setSPos(Vector2 spos);

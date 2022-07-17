@@ -22,6 +22,14 @@ Block::Block(Vector2 spos, SDL_Texture* texture, int scale2) : f_spos(spos), f_s
 	f_current_frame.h = 16;
 }
 
+Block::Block(Vector2 spos, SDL_Texture* texture, Vector2 texture_offset, Vector2 texture_size, int scale2) : f_spos(spos), f_scale2(scale2) {
+    updatePos();
+
+    f_texture = texture;
+    
+    setCurrentFrame(texture_offset, texture_size);
+} 
+
 Vector2& Block::getSPos() {
     return f_spos;
 }
