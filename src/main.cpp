@@ -104,6 +104,7 @@ int main(int argc, char* args[]) {
     bool game_running = true;
     bool wall_collision = false;
     bool self_collision = false;
+    bool ate = false;
     Vector2 svel = zero_vec;
     SDL_Event event;
     SDL_Scancode scancode;
@@ -165,6 +166,16 @@ int main(int argc, char* args[]) {
                     continue;
                 }
 
+                // grow if ate on previous frame
+                if (ate) {
+                    snake[snake_size] = Block(snake[snake_size-1].getSPos(), snake_sprites, zero_vec, zero_vec, block_scale);
+                    snake_size++;
+                    if (snake_size == num_blocks) {
+                        game_running = false;
+                    }
+                    ate = false;
+                }
+
                 // update body blocks from back to front
                 available_blocks.insert(Utils::vectorToBlockNum(snake[snake_size-1].getSPos(), win_block_w));
                 for (int i=snake_size-1; i>0; i--) {
@@ -176,14 +187,10 @@ int main(int argc, char* args[]) {
                 head_spos = head_spos_buffer;
                 available_blocks.erase(Utils::vectorToBlockNum(head_spos, win_block_w));
 
-                // handle eating
+                // detect new eating
                 if (head_spos == food.getSPos()) {
                     food.setSPos(Utils::blockNumToVector(Utils::randElementInSet(&available_blocks), win_block_w));
-                    snake[snake_size] = Block(snake[snake_size-1].getSPos(), snake_sprites, zero_vec, zero_vec, block_scale);
-                    snake_size++;
-                    if (snake_size == num_blocks) {
-                        game_running = false;
-                    }
+                    ate = true;  
                 }
 
                 // update sprite data in 4 steps
