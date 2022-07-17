@@ -37,6 +37,13 @@ void Entity::setCurrentFrame(Vector2 offset, Vector2 size) {
 	f_current_frame.h = size.f_y;
 }
 
+void Entity::setCurrentFrame(SDL_Rect new_frame) {
+    f_current_frame.x = new_frame.x;
+    f_current_frame.y = new_frame.y;
+    f_current_frame.w = new_frame.w;
+    f_current_frame.h = new_frame.h;
+}
+
 SDL_Texture* Entity::getTexture() {
 	return f_texture;
 }

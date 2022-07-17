@@ -41,7 +41,7 @@ int main(int argc, char* args[]) {
     }
 
     // game setup
-    char win_name[] = "Snake v0.3";
+    char win_name[] = "Snake v0.4";
     const int win_w = 256;
     const int win_h = 240;
     const int win_scale = 1;
@@ -95,7 +95,7 @@ int main(int argc, char* args[]) {
     float timestep = 10.0f;  // position updates every 1.0/timestep seconds 
 
     int dir = 0;
-    const Vector2 dir_none  = Vector2( 0,  0);
+    const Vector2 zero_vec  = Vector2( 0,  0);
     const Vector2 dir_up    = Vector2( 0, -1);
     const Vector2 dir_down  = Vector2( 0,  1);
     const Vector2 dir_left  = Vector2(-1,  0);
@@ -104,7 +104,7 @@ int main(int argc, char* args[]) {
     bool game_running = true;
     bool wall_collision = false;
     bool self_collision = false;
-    Vector2 svel = dir_none;
+    Vector2 svel = zero_vec;
     SDL_Event event;
     SDL_Scancode scancode;
 	while (game_running) {
@@ -151,7 +151,7 @@ int main(int argc, char* args[]) {
                 svel = dir_right;
             }
 
-            if (svel != dir_none) {
+            if (svel != zero_vec) {
                 // calculate proposed new head + check collisions
                 head_spos_buffer = head_spos + svel;
                 wall_collision = (head_spos_buffer.f_x < 0) || (head_spos_buffer.f_x >= win_block_w) || (head_spos_buffer.f_y < 0) || (head_spos_buffer.f_y >= win_block_h);
@@ -159,7 +159,7 @@ int main(int argc, char* args[]) {
                     std::cout << "WALL COLLISION" << std::endl;
                     continue;
                 }
-                self_collision = available_blocks.find(Utils::vectorToBlockNum(head_spos_buffer, win_block_w)) == available_blocks.end() && svel != dir_none;
+                self_collision = available_blocks.find(Utils::vectorToBlockNum(head_spos_buffer, win_block_w)) == available_blocks.end() && svel != zero_vec;
                 if (self_collision) {
                     std::cout << "SELF COLLISION" << std::endl;
                     continue;
@@ -179,7 +179,7 @@ int main(int argc, char* args[]) {
                 // handle eating
                 if (head_spos == food.getSPos()) {
                     food.setSPos(Utils::blockNumToVector(Utils::randElementInSet(&available_blocks), win_block_w));
-                    snake[snake_size] = Block(snake[snake_size-1].getSPos(), snake_sprites, block_scale);
+                    snake[snake_size] = Block(snake[snake_size-1].getSPos(), snake_sprites, zero_vec, zero_vec, block_scale);
                     snake_size++;
                     if (snake_size == num_blocks) {
                         game_running = false;
@@ -194,6 +194,9 @@ int main(int argc, char* args[]) {
                 else if (svel == dir_right) snake[0].setCurrentFrame(sprite_h_r, block_dim);
 
                 // step 2: body (snake[2:snake_size-1])
+                for (int i=snake_size-2; i>1; i--) {
+                    snake[i].setCurrentFrame(snake[i-1].getCurrentFrame());
+                }
 
                 // step 3: tail (snake[snake_size-1])
                 Vector2 delta = snake[snake_size-2].getSPos() - snake[snake_size-1].getSPos();

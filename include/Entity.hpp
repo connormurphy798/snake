@@ -21,6 +21,8 @@ public:
 
     void setCurrentFrame(Vector2 offset, Vector2 size);
 
+    void setCurrentFrame(SDL_Rect new_frame);
+
 	SDL_Texture* getTexture();
 
 protected:
