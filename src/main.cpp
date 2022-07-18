@@ -44,7 +44,7 @@ int main(int argc, char* args[]) {
     }
 
     // game setup
-    char win_name[] = "Snake v0.5";
+    char win_name[] = "Snake v1.0";
     const int win_w = 256;
     const int win_h = 240;
     const int win_scale = 1;
@@ -102,9 +102,8 @@ int main(int argc, char* args[]) {
 	// game loop
     unsigned long long curr_time = 0;
     unsigned long long next_time = 0;
-    float timestep = 6.0f;  // position updates every 1.0/timestep seconds 
+    float timestep = 10.0f;  // position updates every 1.0/timestep seconds 
 
-    int dir = 0;
     const Vector2 zero_vec  = Vector2( 0,  0);
     const Vector2 dir_up    = Vector2( 0, -1);
     const Vector2 dir_down  = Vector2( 0,  1);
@@ -132,20 +131,20 @@ int main(int argc, char* args[]) {
                     game_running = false;
                 }
                 if (game_state == e_initial || game_state == e_playing) {
-                    if (scancode == keyboard.f_up) {
-                        dir = 1;
+                    if (scancode == keyboard.f_up && snake[0].getSPos() != snake[1].getSPos()+dir_down) {
+                        svel = dir_up;
                         game_state = e_playing;
                     }
-                    else if (scancode == keyboard.f_down) {
-                        dir = 2;
+                    else if (scancode == keyboard.f_down && snake[0].getSPos() != snake[1].getSPos()+dir_up) {
+                        svel = dir_down;
                         game_state = e_playing;
                     }
-                    else if (scancode == keyboard.f_left && game_state != e_initial) {  // snake starts oriented right
-                        dir = 3;
+                    else if (scancode == keyboard.f_left && snake[0].getSPos() != snake[1].getSPos()+dir_right) { 
+                        svel = dir_left;
                         game_state = e_playing;
                     }
-                    else if (scancode == keyboard.f_right) {
-                        dir = 4;
+                    else if (scancode == keyboard.f_right && snake[0].getSPos() != snake[1].getSPos()+dir_left) {
+                        svel = dir_right;
                         game_state = e_playing;
                     }
                 }
@@ -156,20 +155,6 @@ int main(int argc, char* args[]) {
         next_time = (unsigned long long) (Utils::upTimeSeconds() * timestep);
         // limit update rate
         if (next_time > curr_time) {
-            // convert keyboard input into velocity
-            if (dir == 1 && svel != dir_down) {
-                svel = dir_up;
-            }
-            else if (dir == 2  && svel != dir_up) {
-                svel = dir_down;
-            }
-            else if (dir == 3 && svel != dir_right) {
-                svel = dir_left;
-            }
-            else if (dir == 4 && svel != dir_left) {
-                svel = dir_right;
-            }
-
             if (game_state == e_playing) {
                 // calculate proposed new head + check collisions
                 head_spos_buffer = head_spos + svel;
@@ -178,15 +163,15 @@ int main(int argc, char* args[]) {
                                     (head_spos_buffer.f_y <= frame_limits[0]) ||
                                     (head_spos_buffer.f_y >= frame_limits[1]);
                 if (wall_collision) {
-                    dir = 0;
                     game_state = e_lost;
+                    timestep = 10.0f;
                     std::cout << "WALL COLLISION" << std::endl;
                     continue;
                 }
-                self_collision = available_blocks.find(Utils::vectorToBlockNum(head_spos_buffer, win_block_w)) == available_blocks.end() && svel != zero_vec;
+                self_collision = (available_blocks.find(Utils::vectorToBlockNum(head_spos_buffer, win_block_w)) == available_blocks.end() && head_spos_buffer != snake[snake_size-1].getSPos()) && svel != zero_vec;
                 if (self_collision) {
-                    dir = 0;
                     game_state = e_lost;
+                    timestep = 10.0f;
                     std::cout << "SELF COLLISION" << std::endl;
                     continue;
                 }
@@ -195,9 +180,6 @@ int main(int argc, char* args[]) {
                 if (ate) {
                     snake[snake_size] = Block(snake[snake_size-1].getSPos(), snake_sprites, zero_vec, zero_vec, block_scale);
                     snake_size++;
-                    if (snake_size == num_blocks) {
-                        game_running = false;
-                    }
                     ate = false;
                 }
 
@@ -214,7 +196,11 @@ int main(int argc, char* args[]) {
 
                 // detect new eating
                 if (head_spos == food.getSPos()) {
-                    food.setSPos(Utils::blockNumToVector(Utils::randElementInSet(&available_blocks), win_block_w));
+                    if (available_blocks.size() == 0) {
+                        game_state = e_won;
+                    } else {
+                        food.setSPos(Utils::blockNumToVector(Utils::randElementInSet(&available_blocks), win_block_w));
+                    } 
                     ate = true;  
                 }
 
@@ -283,7 +269,9 @@ int main(int argc, char* args[]) {
         else if (game_state == e_lost) {
             if (snake_size) top_text.setCurrentFrame(Vector2(0,0), Vector2(0,0));
             else            top_text.setCurrentFrame(Vector2(0,32), Vector2(win_w * 7 / 8, win_h * 2 / 15));
-        } 
+        } else if (game_state == e_won)
+            top_text.setCurrentFrame(Vector2(0,64), Vector2(win_w * 7 / 8, win_h * 2 / 15));
+        
         window.render(top_text);
         
 

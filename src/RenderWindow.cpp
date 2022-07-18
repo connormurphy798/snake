@@ -14,6 +14,10 @@ RenderWindow::RenderWindow(const char* title, int width, int height, int scale) 
 		std::cout << "SDL failed to create renderer. Error " << SDL_GetError() << std::endl;
 	}
 
+    // set background color
+    SDL_SetRenderDrawColor(f_renderer, 55, 55, 55, 255);
+    
+
 }
 
 
