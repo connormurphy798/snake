@@ -22,6 +22,10 @@ namespace Utils {
         return min(max(a, b), c);
     }
 
+    inline bool isEven(int n) {
+        return ((n >> 1) << 1) == n;
+    }
+
     inline int log2(int n) {
         assert(n > 0);
         int log=0;

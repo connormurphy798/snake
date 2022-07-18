@@ -44,17 +44,22 @@ int main(int argc, char* args[]) {
     }
 
     // game setup
-    char win_name[] = "Snake v0.4";
+    char win_name[] = "Snake v0.5";
     const int win_w = 256;
     const int win_h = 240;
     const int win_scale = 1;
     RenderWindow window = RenderWindow(win_name, win_w, win_h, win_scale);
+    Entity frame = Entity(Vector2(0,0), window.loadTexture("res/img/frame.png"));
+    frame.setCurrentFrame(Vector2(0,0), Vector2(win_w, win_h));
+    Entity top_text = Entity(Vector2(16, 16), window.loadTexture("res/img/controls.png"));
+    top_text.setCurrentFrame(Vector2(0,0), Vector2(win_w * 7 / 8, win_h * 2 / 15));
     
     const int block_size = 16;
     const int block_scale = Utils::log2(block_size);
     const int win_block_w = win_w >> block_scale;   
     const int win_block_h = win_h >> block_scale;
     const int num_blocks = win_block_h * win_block_w;
+    const int frame_limits[4] = {4, 14, 0, 15};
 
     // constants denoting texture positions on sprite sheet
     const Vector2 sprite_h_u  = Vector2( 0,  0);    const Vector2 sprite_h_d  = Vector2( 16,  0);
@@ -77,8 +82,10 @@ int main(int argc, char* args[]) {
 
     // create set of available blocks, 0 to num_blocks-1
     std::unordered_set<unsigned short> available_blocks;
-    for (unsigned short i=0; i<num_blocks; i++) {
-        available_blocks.insert(i);
+    for (unsigned short i=frame_limits[2]+1; i<frame_limits[3]; i++) {
+        for (unsigned short j=frame_limits[0]+1; j<frame_limits[1]; j++) {
+            available_blocks.insert(Utils::vectorToBlockNum(Vector2(i,j), win_block_w));
+        }
     }
     available_blocks.erase(Utils::vectorToBlockNum(head_spos,                  win_block_w));
     available_blocks.erase(Utils::vectorToBlockNum(head_spos + Vector2(-1, 0), win_block_w));
@@ -95,7 +102,7 @@ int main(int argc, char* args[]) {
 	// game loop
     unsigned long long curr_time = 0;
     unsigned long long next_time = 0;
-    float timestep = 10.0f;  // position updates every 1.0/timestep seconds 
+    float timestep = 6.0f;  // position updates every 1.0/timestep seconds 
 
     int dir = 0;
     const Vector2 zero_vec  = Vector2( 0,  0);
@@ -124,22 +131,25 @@ int main(int argc, char* args[]) {
                 if (scancode == keyboard.f_back) {
                     game_running = false;
                 }
-                if (scancode == keyboard.f_up) {
-                    dir = 1;
-                    game_state = e_playing;
+                if (game_state == e_initial || game_state == e_playing) {
+                    if (scancode == keyboard.f_up) {
+                        dir = 1;
+                        game_state = e_playing;
+                    }
+                    else if (scancode == keyboard.f_down) {
+                        dir = 2;
+                        game_state = e_playing;
+                    }
+                    else if (scancode == keyboard.f_left && game_state != e_initial) {  // snake starts oriented right
+                        dir = 3;
+                        game_state = e_playing;
+                    }
+                    else if (scancode == keyboard.f_right) {
+                        dir = 4;
+                        game_state = e_playing;
+                    }
                 }
-                else if (scancode == keyboard.f_down) {
-                    dir = 2;
-                    game_state = e_playing;
-                }
-                else if (scancode == keyboard.f_left) {
-                    dir = 3;
-                    game_state = e_playing;
-                }
-                else if (scancode == keyboard.f_right) {
-                    dir = 4;
-                    game_state = e_playing;
-                }
+                
             }     
         }
 
@@ -163,7 +173,10 @@ int main(int argc, char* args[]) {
             if (game_state == e_playing) {
                 // calculate proposed new head + check collisions
                 head_spos_buffer = head_spos + svel;
-                wall_collision = (head_spos_buffer.f_x < 0) || (head_spos_buffer.f_x >= win_block_w) || (head_spos_buffer.f_y < 0) || (head_spos_buffer.f_y >= win_block_h);
+                wall_collision =    (head_spos_buffer.f_x <= frame_limits[2]) ||
+                                    (head_spos_buffer.f_x >= frame_limits[3]) ||
+                                    (head_spos_buffer.f_y <= frame_limits[0]) ||
+                                    (head_spos_buffer.f_y >= frame_limits[1]);
                 if (wall_collision) {
                     dir = 0;
                     game_state = e_lost;
@@ -252,11 +265,8 @@ int main(int argc, char* args[]) {
 
             }
             
-            if (game_state == e_lost) {
-                if (snake_size == 0) {
-                    std::cout << "YOU DIED" << std::endl;
-                }
-                snake_size--;
+            if (game_state == e_lost && snake_size > 0) {
+                snake_size--;  
             }
 
             
@@ -265,6 +275,17 @@ int main(int argc, char* args[]) {
         }
 
  		window.clear();
+
+        window.render(frame);
+
+        if (game_state == e_initial || game_state == e_playing)
+            top_text.setCurrentFrame(Vector2(0,0), Vector2(win_w * 7 / 8, win_h * 2 / 15));
+        else if (game_state == e_lost) {
+            if (snake_size) top_text.setCurrentFrame(Vector2(0,0), Vector2(0,0));
+            else            top_text.setCurrentFrame(Vector2(0,32), Vector2(win_w * 7 / 8, win_h * 2 / 15));
+        } 
+        window.render(top_text);
+        
 
         for (int i=0; i<snake_size; i++) {
             window.render(snake[i]);
