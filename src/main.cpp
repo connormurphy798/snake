@@ -16,6 +16,9 @@
 #include "Block.hpp"
 
 
+enum State {e_initial, e_playing, e_won, e_lost};
+
+
 template <class T>
 void printNotInSet(const std::unordered_set<T>* set, const T* elements, int num) {
     for (int i=0; i<num; i++) {
@@ -105,6 +108,7 @@ int main(int argc, char* args[]) {
     bool wall_collision = false;
     bool self_collision = false;
     bool ate = false;
+    State game_state = e_initial;
     Vector2 svel = zero_vec;
     SDL_Event event;
     SDL_Scancode scancode;
@@ -122,15 +126,19 @@ int main(int argc, char* args[]) {
                 }
                 if (scancode == keyboard.f_up) {
                     dir = 1;
+                    game_state = e_playing;
                 }
                 else if (scancode == keyboard.f_down) {
                     dir = 2;
+                    game_state = e_playing;
                 }
                 else if (scancode == keyboard.f_left) {
                     dir = 3;
+                    game_state = e_playing;
                 }
                 else if (scancode == keyboard.f_right) {
                     dir = 4;
+                    game_state = e_playing;
                 }
             }     
         }
@@ -152,16 +160,20 @@ int main(int argc, char* args[]) {
                 svel = dir_right;
             }
 
-            if (svel != zero_vec) {
+            if (game_state == e_playing) {
                 // calculate proposed new head + check collisions
                 head_spos_buffer = head_spos + svel;
                 wall_collision = (head_spos_buffer.f_x < 0) || (head_spos_buffer.f_x >= win_block_w) || (head_spos_buffer.f_y < 0) || (head_spos_buffer.f_y >= win_block_h);
                 if (wall_collision) {
+                    dir = 0;
+                    game_state = e_lost;
                     std::cout << "WALL COLLISION" << std::endl;
                     continue;
                 }
                 self_collision = available_blocks.find(Utils::vectorToBlockNum(head_spos_buffer, win_block_w)) == available_blocks.end() && svel != zero_vec;
                 if (self_collision) {
+                    dir = 0;
+                    game_state = e_lost;
                     std::cout << "SELF COLLISION" << std::endl;
                     continue;
                 }
@@ -238,6 +250,13 @@ int main(int argc, char* args[]) {
 
                 }   
 
+            }
+            
+            if (game_state == e_lost) {
+                if (snake_size == 0) {
+                    std::cout << "YOU DIED" << std::endl;
+                }
+                snake_size--;
             }
 
             
