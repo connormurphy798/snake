@@ -5,6 +5,3 @@ bin
 
 # build files
 build_*.txt
-
-# asset development
-res/dev/*
