@@ -8,6 +8,7 @@
 #include <SDL2/SDL_image.h>
 #include <iostream>
 #include <unordered_set>
+#include <queue>
 
 #include "RenderWindow.hpp"
 #include "Entity.hpp"
@@ -46,7 +47,7 @@ int main(int argc, char* args[]) {
     // game setup
     char win_name[] = "Snake v1.0";
     const int win_w = 256;
-    const int win_h = 240;
+    const int win_h = 256;
     const int win_scale = 1;
     RenderWindow window = RenderWindow(win_name, win_w, win_h, win_scale);
     Entity frame = Entity(Vector2(0,0), window.loadTexture("res/img/frame.png"));
@@ -59,7 +60,7 @@ int main(int argc, char* args[]) {
     const int win_block_w = win_w >> block_scale;   
     const int win_block_h = win_h >> block_scale;
     const int num_blocks = win_block_h * win_block_w;
-    const int frame_limits[4] = {4, 14, 0, 15};
+    const int frame_limits[4] = {4, 15, 0, 15};
 
     // constants denoting texture positions on sprite sheet
     const Vector2 sprite_h_u  = Vector2( 0,  0);    const Vector2 sprite_h_d  = Vector2( 16,  0);
@@ -118,8 +119,9 @@ int main(int argc, char* args[]) {
     Vector2 svel = zero_vec;
     SDL_Event event;
     SDL_Scancode scancode;
+    std::queue<Vector2> move_queue;
 	while (game_running) {
-        if (SDL_PollEvent(&event)) {
+        while (SDL_PollEvent(&event)) {
             // check for quit event
             if (event.type == SDL_QUIT) {
                 game_running = false;
@@ -132,19 +134,19 @@ int main(int argc, char* args[]) {
                 }
                 if (game_state == e_initial || game_state == e_playing) {
                     if (scancode == keyboard.f_up && snake[0].getSPos() != snake[1].getSPos()+dir_down) {
-                        svel = dir_up;
+                        move_queue.push(dir_up);
                         game_state = e_playing;
                     }
                     else if (scancode == keyboard.f_down && snake[0].getSPos() != snake[1].getSPos()+dir_up) {
-                        svel = dir_down;
+                        move_queue.push(dir_down);
                         game_state = e_playing;
                     }
                     else if (scancode == keyboard.f_left && snake[0].getSPos() != snake[1].getSPos()+dir_right) { 
-                        svel = dir_left;
+                        move_queue.push(dir_left);
                         game_state = e_playing;
                     }
                     else if (scancode == keyboard.f_right && snake[0].getSPos() != snake[1].getSPos()+dir_left) {
-                        svel = dir_right;
+                        move_queue.push(dir_right);
                         game_state = e_playing;
                     }
                 }
@@ -156,6 +158,12 @@ int main(int argc, char* args[]) {
         // limit update rate
         if (next_time > curr_time) {
             if (game_state == e_playing) {
+                // update svel based on first move in queue
+                if (!move_queue.empty()) {
+                    svel = move_queue.front();
+                    move_queue.pop();
+                }
+
                 // calculate proposed new head + check collisions
                 head_spos_buffer = head_spos + svel;
                 wall_collision =    (head_spos_buffer.f_x <= frame_limits[2]) ||
@@ -165,14 +173,14 @@ int main(int argc, char* args[]) {
                 if (wall_collision) {
                     game_state = e_lost;
                     timestep = 10.0f;
-                    std::cout << "WALL COLLISION" << std::endl;
+                    //std::cout << "WALL COLLISION" << std::endl;
                     continue;
                 }
                 self_collision = (available_blocks.find(Utils::vectorToBlockNum(head_spos_buffer, win_block_w)) == available_blocks.end() && head_spos_buffer != snake[snake_size-1].getSPos()) && svel != zero_vec;
                 if (self_collision) {
                     game_state = e_lost;
                     timestep = 10.0f;
-                    std::cout << "SELF COLLISION" << std::endl;
+                    //std::cout << "SELF COLLISION" << std::endl;
                     continue;
                 }
 
