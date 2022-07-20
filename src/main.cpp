@@ -114,6 +114,7 @@ int main(int argc, char* args[]) {
     bool game_running = true;
     bool wall_collision = false;
     bool self_collision = false;
+    int collision_count;
     bool ate = false;
     State game_state = e_initial;
     Vector2 svel = zero_vec;
@@ -157,6 +158,7 @@ int main(int argc, char* args[]) {
         next_time = (unsigned long long) (Utils::upTimeSeconds() * timestep);
         // limit update rate
         if (next_time > curr_time) {
+            curr_time = next_time;
             if (game_state == e_playing) {
                 // update svel based on first move in queue
                 if (!move_queue.empty()) {
@@ -170,19 +172,18 @@ int main(int argc, char* args[]) {
                                     (head_spos_buffer.f_x >= frame_limits[3]) ||
                                     (head_spos_buffer.f_y <= frame_limits[0]) ||
                                     (head_spos_buffer.f_y >= frame_limits[1]);
-                if (wall_collision) {
-                    game_state = e_lost;
-                    timestep = 10.0f;
-                    //std::cout << "WALL COLLISION" << std::endl;
+                self_collision = (available_blocks.find(Utils::vectorToBlockNum(head_spos_buffer, win_block_w)) == available_blocks.end() && head_spos_buffer != snake[snake_size-1].getSPos()) && svel != zero_vec;                    
+                if (wall_collision || self_collision) {
+                    collision_count++;
+                    if (collision_count > 1) {
+                        game_state = e_lost;
+                    }
                     continue;
                 }
-                self_collision = (available_blocks.find(Utils::vectorToBlockNum(head_spos_buffer, win_block_w)) == available_blocks.end() && head_spos_buffer != snake[snake_size-1].getSPos()) && svel != zero_vec;
-                if (self_collision) {
-                    game_state = e_lost;
-                    timestep = 10.0f;
-                    //std::cout << "SELF COLLISION" << std::endl;
-                    continue;
+                else {
+                    collision_count = 0;
                 }
+
 
                 // grow if ate on previous frame
                 if (ate) {
@@ -262,10 +263,6 @@ int main(int argc, char* args[]) {
             if (game_state == e_lost && snake_size > 0) {
                 snake_size--;  
             }
-
-            
-
-            curr_time = next_time;
         }
 
  		window.clear();
