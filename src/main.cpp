@@ -45,7 +45,7 @@ int main(int argc, char* args[]) {
     }
 
     // game setup
-    char win_name[] = "Snake v1.0";
+    char win_name[] = "Snake v1.1";
     const int win_w = 256;
     const int win_h = 256;
     const int win_scale = 1;
@@ -284,7 +284,7 @@ int main(int argc, char* args[]) {
             window.render(snake[i]);
         } 
 
-        window.render(food);
+        if (game_state != e_won) window.render(food);
 
  		window.display();
 	}
