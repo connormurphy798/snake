@@ -4,4 +4,5 @@ bin
 *.o
 
 # build files
-build_*.txt
+text/build_*.txt
+text/play_*.txt

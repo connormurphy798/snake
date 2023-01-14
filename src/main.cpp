@@ -114,7 +114,7 @@ int main(int argc, char* args[]) {
     bool game_running = true;
     bool wall_collision = false;
     bool self_collision = false;
-    int collision_count;
+    int collision_count = 0;
     bool ate = false;
     State game_state = e_initial;
     Vector2 svel = zero_vec;
